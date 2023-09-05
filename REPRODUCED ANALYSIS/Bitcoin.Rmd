@@ -362,3 +362,42 @@ Box.test(res2, lag = 12, type = "Ljung-Box")
 The sarima model also has the same draw backs as the arima model
 
 
+
+### prophet
+
+Prophet is a forecasting model developed by Facebook that is designed to handle time series data with strong seasonality, holidays, and other patterns. It's particularly well-suited for business and economic forecasting, as well as other applications where historical data needs to be used to predict future values.
+
+Prophet is available as an R package and provides a user-friendly interface to create accurate forecasts without requiring in-depth expertise in time series modeling. It incorporates several important features:
+
+from this prophet model we have to use the original data as prophet model reqires actual dates. plottog the wholde data dosent give a clear plot from the mmass amount of information we have the plot becomes too samll to see anything clearly.
+
+```{r}
+library(prophet)
+ds <- btc_history$Date
+y <- btc_history$Price
+pr.data <- data.frame(ds, y)
+ml.pr <- prophet(pr.data, daily.seasonality = TRUE)
+future <- make_future_dataframe(ml.pr, periods = 365, freq = 'day')
+prd <- predict(ml.pr, future)
+
+```
+
+this is a pictorial flow of howw the bitcoin trends behave throught the year week and month and times of the day,
+
+```{r}
+prophet_plot_components(ml.pr, prd)
+```
+
+### Determination of Saturation Points
+
+"saturating growth" or "saturation level" might refer to a scenario where a certain variable is growing or changing over time but is expected to level off and stabilize at some point. For instance, if you are modeling the adoption of a new product, the growth rate might initially be rapid but eventually slow down as the product reaches its maximum potential market share. In this case, the "saturation point" could refer to the point at which the growth stops and the variable reaches its maximum value.
+
+```{r}
+model = prophet(pr.data, n.changepoints = 12)
+future = make_future_dataframe(model,periods = 365, freq = 'day')
+plot(model,prd)+add_changepoints_to_plot(model)+xlab("Date")+ylab("Avg Price")
+```
+
+## CONCLUSION
+
+The best model to be used was the PROPHET MODEL. adding more data into it has revealed that bitcoin will drop untill mid 2024. unless un forseen circumstances that are not yet to be fearured occure from our model we do not see a rise but a continous downtrend with significant rises but not higher than the previous drop.
