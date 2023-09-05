@@ -19,3 +19,20 @@ Bitcoin is the longest running and most well known cryptocurrency, first release
 -ARIMA -SARIMA -PROPHET -To further the study my data is upto date to 2023 august.
 
 *THE NEWLY ADDED MODELS* From my analysis am trying to improve the auhors work by adding the following two new models. 1. SARIMA 2. WAVENET MODEL
+
+
+## LIBRARIES USED IN THIS ANALYSIS
+
+1.  A character vector named lib is created to store the names of the desired R packages. Each package name is enclosed in double quotation marks and separated by commas.
+
+2.  The lapply() function is utilized to iterate over the elements of the lib vector. For each package name in the vector, the library() function is applied.
+
+3.  This loads the respective package into the R environment. The character.only argument is set to TRUE to indicate that only character strings (package names) are being passed. The purpose of running this code is to ensure that the listed packages are loaded and available for use within the R script. It's important to note the following:
+
+Some packages, such as rnn, TSrepr, sarima, tensorflow, keras, aTSA, xgboost, tidymodels, timetk, fpp3, and biwavelet, may require additional installation steps, dependencies, or prerequisites to be set up properly. An active internet connection is necessary, as the packages are downloaded and installed from the CRAN repository if they're not already present.
+
+```{r echo=FALSE}
+lib <- c("readr", "tidyverse", "tidyr", "rnn", "dplyr", "ggplot2", "plotly", "gganimate", "TSrepr", "sarima", "tensorflow", "keras","forecast","aTSA","xgboost","tidymodels","timetk","fpp3","biwavelet")
+#lapply(lib, install.packages, character.only = TRUE) installation of packages if you lack them
+lapply(lib, library, character.only = TRUE)
+```
