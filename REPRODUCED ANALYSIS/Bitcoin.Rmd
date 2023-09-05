@@ -1,0 +1,6 @@
+---
+title: "REPRORODUCIBLE RESEARCH WITH BITCOIN FORECASTING"
+author: "AYOUB"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
