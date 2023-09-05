@@ -37,3 +37,34 @@ lib <- c("readr", "tidyverse", "tidyr", "rnn", "dplyr", "ggplot2", "plotly", "gg
 lapply(lib, library, character.only = TRUE)
 
 ```
+
+## DATA IMPORTATION
+
+2.  <div>
+
+    1.  This code reads a CSV file named "btc_history.csv" containing historical data for Bitcoin (BTC) and performs some data manipulation. Let's break down each line of code:
+    2.  **`btc_history <- read_csv("btc_history.csv")`**:
+        -   This line uses the **`read_csv()`** function from the "readr" package (assumed to be loaded in your environment) to read the contents of a CSV file named "btc_history.csv" into a data frame named **`btc_history`**.
+
+        -   The **`read_csv()`** function is commonly used for reading comma-separated values (CSV) files while maintaining the data's structure.
+    3.  **`btc_history$Date <- as.Date(btc_history$Date, "%b %d, %Y")`**:
+        -   This line modifies the **`Date`** column in the **`btc_history`** data frame by converting it to a date format.
+
+        -   **`btc_history$Date`** refers to the **`Date`** column in the data frame.
+
+        -   The **`as.Date()`** function is used to convert the dates in the specified format ("%b %d, %Y") to the standard Date class in R. The format string corresponds to the format used in the column.
+
+            -   **`%b`** represents abbreviated month names (e.g., Jan, Feb, \...).
+
+            -   **`%d`** represents day of the month as a zero-padded decimal number (01, 02, \..., 31).
+
+            -   **`%Y`** represents the year with century as a decimal number (e.g., 2023).
+
+        -   The result of the **`as.Date()`** conversion is then assigned back to the **`Date`** column in the **`btc_history`** data frame.
+
+    </div>
+
+```{r}
+btc_history <- read_csv("btc_history.csv")
+btc_history$Date <- as.Date(btc_history$Date, "%b %d, %Y")
+```
