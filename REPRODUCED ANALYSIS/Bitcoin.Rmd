@@ -127,3 +127,237 @@ month_btc %>%
 ```
 
 from these visualisation we see the growth of bitcoin and spikes throught the years like November 6th 2010, Bitcoin share capital reaches 1 million USD. Its exchange rate on MtGox reaches USD 0.50 per BTC. June 2nd 2011, USD to BTC rate is 10 USD to the coin. For 6 days, the Bitcoin value is fixed at 31.91 USD on MtGox. February 28th 2013, Bitcoin exchange rate surpasses 31.91 USD for the first time for the last 601 days. April 1st,2013 Exchange rate of Bitcoin reaches 100 USD to 1 BTC. January,2015 Coinbase raised 75 million USD as part of a Series C funding round, smashing the previous record for a bitcoin company. February ,2015 Bitcoin price reached USD 262. January 2017,After the rally for most of the second half of 2016, bitcoin broke the USD 1,000 mark for the first time in 3 years. June 12th 2017, Bitcoin exchange rate exceeds USD 3000 to the BTC. November 29th 2017, Bitcoin price exceeds USD 10,000. December 18th 2017, Bitcoin reaches a record high, but does not reach USD 20,000. December 28th 2017, The price of bitcoins fell after South Korea announced additional measures to regulate bitcoin trading, including the potential closure of exchanges, among the volatile movements in the world's third largest cryptocurrency market. October 31st 2018, USD 6,300, on the 10 year anniversary of Bitcoin, price holds steady above USD 6,000 during a period of historically low volatility.
+
+
+## Time Series Analysis
+
+time series analysis tends to show how data changes over time, capturing diferent values of the changes like seasonality. Seasonallity are the changes that occur at specific intervals. these changes seem to occur at the same intervals and create a certain patern that can be seen when data is ploted over time. these seasonality tend to bring variation when they changed hence we need time series analysis. another variation time series checks out is moving averages. the moving averages removes the peakedness of data when plotted. the plots above have very sharp peaks on spikes in prices. moving averages creates smooth curves for the analysis.
+
+moving averages can help identify trends to. these trends are what we want to remove so that we can have data that is free from any specific changes that are from external factors.
+
+movnig averages can also identify outliers. while performing moving verages and we identtify outlier we will have to investigate these changes. the changes can be caused by anything from suddne spike in prices that is caused by factors in the real world like war, diseases and any inernational events can also lead to drop in prices.
+
+## CREATING THE TIME-SERIES DATA
+
+Irespective of the fact that our data has dates and time month it still has to be parsed into the time-series formats.
+
+```{r}
+monthly.ts <- ts(format(month_btc$monthly.price))#, scientific = FALSE, big.mark = ","), start = c(2010,7), frequency = 12)
+monthly.ts2 <- ts(format(month_btc$monthly.price, scientific = FALSE), start = c(2010,7), frequency = 12)
+plot(monthly.ts2)
+```
+
+#### DATA PROCESSING
+
+Here we normalisae the data.
+
+```{r}
+normalized_data <- month_btc  %>%
+  mutate(monthly.price.norma = (monthly.price - min(monthly.price)) / (max(monthly.price) - min(monthly.price)))
+head(normalized_data)
+
+```
+
+### Split into training and testing sets
+
+Splitting the data helps in testing the model efficinecy to help in checking th accuracy of our model. we want models witht the highest level of efficiency.
+
+```{r}
+train_size <- 0.8
+train_samples <- floor(nrow(normalized_data) * train_size)
+
+train_data <- normalized_data[1:train_samples, ]
+test_data <- normalized_data[(train_samples + 1):nrow(normalized_data), ]
+```
+
+### CREATINGA ARIMA MODEL
+
+```{r}
+arima_model <- auto.arima(train_data$monthly.price.norma)
+print(arima_model)
+summary(arima_model)
+```
+
+#### model briefing
+
+This code segment fits an ARIMA (AutoRegressive Integrated Moving Average) model to the normalized monthly price data of Bitcoin (\`train_data\$monthly.price.norma\`). Here's a breakdown of each line:
+
+1\. \`arima_model \<- auto.arima(train_data\$monthly.price.norma)\`:
+
+-   The \`auto.arima()\` function, from the "forecast" package (assuming it's loaded), automatically determines the best-fitting ARIMA model for the provided time series data.
+
+-   \`train_data\$monthly.price.norma\` refers to the column containing normalized monthly price data in the \`train_data\` data frame.
+
+-   The result of this function call is stored in the variable \`arima_model\`, representing the fitted ARIMA model.
+
+2\. \`print(arima_model)\`:
+
+-   The \`print()\` function is used to display the details of the fitted ARIMA model stored in \`arima_model\`. This includes information about the chosen model order (p, d, q) and any other relevant information about the model.
+
+3\. \`summary(arima_model)\`:
+
+-   The \`summary()\` function is used to display a summary of the fitted ARIMA model. This includes detailed statistics, coefficients, standard errors, p-values, and other information related to the model's performance and fit to the data.
+
+In summary, the provided code segment performs the following steps:
+
+\- Fits an ARIMA model to the normalized monthly price data of Bitcoin using the \`auto.arima()\` function.
+
+\- Prints the details of the fitted ARIMA model using \`print()\`.
+
+\- Provides a comprehensive summary of the fitted ARIMA model using \`summary()\`.
+
+It's important to note that ARIMA models are used for time series forecasting and analysis. The model order (p, d, q) determined by \`auto.arima()\` indicates the number of autoregressive, differencing, and moving average terms, respectively, used in the model. The quality of the model fit and its performance should be assessed through various diagnostic tools and validation techniques, such as residual analysis and out-of-sample forecasting.
+
+##### model interpretation
+
+-   The ARIMA model has been applied to a time series represented by **`train_data$monthly.price.norma`**, with a frequency of 12 (indicating monthly data).
+
+-   The model coefficients represent the parameters of the ARIMA(0,0,2) model with a non-zero mean.
+
+-   The coefficient **`ma1`** is 0.0828, corresponding to the first moving average term.
+
+-   The coefficient **`ma2`** is -0.2635, corresponding to the second moving average term.
+
+-   The coefficient **`mean`** is 0.3245, representing the non-zero mean.
+
+-   The estimated variance of the model's residuals (sigma squared) is 0.09964.
+
+-   The log likelihood of the model is -32.05.
+
+-   The Akaike Information Criterion (AIC) is 72.11, the corrected AIC (AICc) is 72.44, and the Bayesian Information Criterion (BIC) is 83.45. Lower values indicate better-fitting models.
+
+-   This section provides error measures for evaluating the model's performance on the training set.
+
+-   **`ME`** represents the Mean Error, which is very close to zero.
+
+-   **`RMSE`** is the Root Mean Squared Error, measuring the average magnitude of errors (0.3118738).
+
+-   **`MAE`** is the Mean Absolute Error (0.2603076).
+
+-   **`MPE`** and **`MAPE`** are not well-defined (indicated by **`-Inf`** and **`Inf`**, respectively).
+
+-   **`MASE`** (Mean Absolute Scaled Error) is 0.7383955, measuring relative accuracy.
+
+-   **`ACF1`** is -0.02373901, indicating the first-order autocorrelation of residuals.
+
+In summary, the ARIMA(0,0,2) model with non-zero mean has been fitted to the time series data. The coefficients, variance, information criteria, and error measures provide insights into the model's performance and fit to the training data. Further diagnostics and analysis are recommended for assessing the model's quality and suitability for forecasting and analysis tasks.
+
+#### comparison with the original pynb file
+
+### Python ARIMA Model (Lag 50, Coefficients 0, 1, 2, 1):
+
+This ARIMA model represents a time series forecasting model using the AutoRegressive Integrated Moving Average (ARIMA) approach, implemented in Python. The model is defined with the following parameters:
+
+*ARIMA(0, 1, 2)(1, 0, 0)[50]*
+
+
+- The orders of the AR, I, and MA components are 0, 1, and 2 respectively. This means the model has a first-order differencing (I) to make the data stationary and considers the past two forecast errors for its moving average (MA) component. However, there is no autoregressive (AR) component, as the order is set to 0.
+
+- The seasonal AR, I, and MA components are represented as (1, 0, 0), which indicates a seasonal autoregressive (SAR) component of order 1, and no seasonal integrated (SI) or seasonal moving average (SMA) components.
+
+- The [50] indicates that the model has a seasonal period of 50 time units (lags), which means it takes into account the values at lag 50.
+
+### R ARIMA Model (Lag 1, Coefficients 0, 0, 2):
+
+This ARIMA model represents a time series forecasting model using the ARIMA approach, implemented in R. The model is defined with the following parameters:
+
+
+- The orders of the AR, I, and MA components are 0, 0, and 2 respectively. In this case, there is no differencing (I = 0), and the model considers the past two forecast errors for its moving average (MA) component. Similarly to the Python model, there is no autoregressive (AR) component, as the order is set to 0.
+
+- Since there are no seasonal orders specified, it can be assumed that this model does not incorporate seasonal components.
+
+### Difference between the Two Models:
+
+The key differences between the two models are as follows:
+
+1. **Lag and Time Series Characteristics:**
+   - The Python model has a lag (seasonal period) of 50, meaning it accounts for patterns that repeat every 50 time units.
+   - The R model has a lag of 1, indicating it's looking at the immediate past value.
+
+2. **Coefficient Values:**
+   - The Python model has non-zero coefficient values for the moving average component (2 and 1), whereas the R model has non-zero coefficient values only for the moving average component (2).
+
+3. **Seasonality:**
+   - The Python model explicitly includes a seasonal ARIMA component with a seasonal order of (1, 0, 0), while the R model doesn't specify any seasonal components.
+
+4. **Integration:**
+   - Both models do not include differencing for the integrated (I) component (I = 0), which means they assume that the data is already stationary.
+
+Both models have different approaches to capturing time series patterns and trends. The Python model considers a longer seasonal period and includes a seasonal AR component, while the R model focuses on a simpler structure with just a moving average component. The choice between these models would depend on the characteristics of the specific time series data and the level of complexity needed to accurately capture its behavior.
+
+
+#### *forecasting with arima model*
+
+```{r}
+forecast_data <-forecast::forecast(arima_model, h = length(test_data$monthly.price.norma))
+```
+
+### TESTING ARIMA MODEL STRNGTH
+
+```{r}
+res <- residuals(arima_model)
+res
+Box.test(res, lag = 12, type = "Ljung-Box")
+```
+
+-   **Box-Ljung Test**: This indicates that the Ljung-Box test is being conducted to assess the efficiency of the ARIMA model by examining the autocorrelations of the model's residuals.
+
+-   **Data**: "res" refers to the residuals obtained from the ARIMA model.
+
+-   **X-squared**: The test statistic calculated by the Ljung-Box test. In this context, the test statistic of 17.695 is indicative of the magnitude of the autocorrelations of the residuals.
+
+-   **Degrees of Freedom (df)**: The degrees of freedom associated with the X-squared distribution used in the test. In this case, it's 20.
+
+-   **p-value**: The p-value associated with the test. The p-value measures the probability of observing a test statistic as extreme as the one calculated, assuming that the null hypothesis (of no autocorrelation) is true. In this case, the p-value is 0.6075.
+
+###### **Interpretation**:
+
+-   When assessing the efficiency of an ARIMA model, a low p-value (typically below 0.05) from the Ljung-Box test suggests that there is significant evidence of autocorrelation in the residuals, which indicates that the model might not be efficient in capturing all the underlying patterns in the data.
+
+-   Conversely, a high p-value (greater than 0.05) suggests that there is no significant evidence of autocorrelation in the residuals, indicating that the model is efficient in capturing the patterns in the data.
+
+-   In this case, the relatively high p-value of 0.6075 suggests that the residuals do not exhibit significant autocorrelation. This would indicate that the ARIMA model is relatively efficient in explaining the observed data and capturing the underlying patterns.
+
+    ### arima model conclusion
+
+    this model is not a great fit. the test for eficiency has p vlaue that is greater that 0.05.
+
+```{r}
+# Calculate accuracy measures
+
+
+# Calculate Mean Absolute Percentage Error (MAPE)
+forecast_data$mean - test_data$monthly.price.norma
+mape <- mean(abs((forecast_data$mean - test_data$monthly.price.norma) / test_data$monthly.price.norma)) * 100
+print(paste("MAPE:", mape))
+
+# Calculate Root Mean Squared Error (RMSE)
+rmse <- sqrt(mean((forecast_data$mean - test_data$monthly.price.norma)^2))
+print(paste("RMSE:", rmse))
+```
+
+## SARIMA
+
+for sarima model we first do the adf test to check for staionerity. this help in confirming whether we will require diferencing before performing sarima. the adf test stands for the Augmented Dicky Fuller test. this is a test of stationerity in our data. from our analysis below we fail to accept the null hypothesis and conlcude the data is stationery hence we can proceed with sarima model.
+
+```{r}
+adf.test(train_data$monthly.price.norma)
+```
+
+### SARIMA MODEL
+
+```{r}
+arima_model <- auto.arima(ts(train_data$monthly.price.norma, frequency = 12), seasonal = TRUE)
+sarima.ml <- Arima(test_data$monthly.price.norma, order = c(0,0,2))
+forecast::forecast(sarima.ml,2)
+```
+
+##### testing the sarima model eficiency
+
+```{r}
+res2 <- residuals(sarima.ml)
+Box.test(res2, lag = 12, type = "Ljung-Box")
+```
+
+The sarima model also has the same draw backs as the arima model
+
