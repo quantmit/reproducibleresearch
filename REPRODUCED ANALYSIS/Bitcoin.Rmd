@@ -68,3 +68,62 @@ lapply(lib, library, character.only = TRUE)
 btc_history <- read_csv("btc_history.csv")
 btc_history$Date <- as.Date(btc_history$Date, "%b %d, %Y")
 ```
+
+
+
+# DATA VISUALIZATION
+
+*first we need to get the data into month form as its the daily data of btc prices. using the dplyr and tidyr package this is possible*
+
+## DATA EXPLORATION
+
+our data starts from 2010 july. Now that we have added months and years in our data and pulled out the monthly vallues we can continue to visualisation of the daa.
+
+```{r}
+month_btc <- btc_history %>%
+  mutate(month = format(Date, '%B'), year = format(Date, "%Y")) %>%
+  group_by(year, month) %>%
+  arrange(desc(year)) %>%
+  summarise(monthly.price = mean(Price),monthly.vol = mean(Vol.))
+```
+
+#### Monthly Aggregated Statistics for Bitcoin (BTC) Prices and Volumes
+
+The provided R code processes the \`btc_history\` data frame to calculate monthly aggregated statistics for Bitcoin (BTC) prices and volumes. Here's a breakdown of each step:
+
+The \`%\>%\` operator, also known as the pipe operator, chains together multiple operations on the \`btc_history\` data frame in a readable and concise manner. Each subsequent operation takes the result of the previous operation as its input.
+
+The \`mutate()\` function adds new columns to the data frame based on existing columns. In this line, two new columns named \`month\` and \`year\` are created in the \`btc_history\` data frame. The \`format()\` function extracts the month name (\`%B\`) and year (\`%Y\`) from the \`Date\` column, assigning them to the new columns.
+
+The \`group_by()\` function groups the data by values in the \`year\` and \`month\` columns, preparing it for aggregation within each unique combination of year and month.
+
+The \`arrange()\` function reorders the grouped data based on the \`year\` column in descending order (\`desc(year)\`), arranging the data by year for further processing.
+
+The \`summarise()\` function calculates summary statistics for each group of \`year\` and \`month\`. The \`mean()\` function calculates the average of the \`Price\` and \`Vol.\` columns within each group. The results are stored in two new columns: \`monthly.price\` and \`monthly.vol\`.
+
+After running this code, the \`month_btc\` data frame will contain aggregated statistics for each month and year combination. It will have columns for the year, month, average monthly price (\`monthly.price\`), and average monthly volume (\`monthly.vol\`) of Bitcoin transactions.
+
+In summary, this code processes raw Bitcoin historical data, extracting month and year information, grouping by year and month, arranging by descending year, and calculating average monthly price and volume statistics for each combination of year and month.
+
+You can copy and paste the above content into an R Markdown document (with a \`.Rmd\` extension), and when you knit the document, it will generate a formatted document with the explanation provided in the desired format.
+
+## VISUALISATION
+
+```{r}
+btc_history %>%
+  ggplot(mapping = aes(x = Date, y = Price)) +
+  geom_line(color = "green") 
+
+anim <- btc_history %>%
+  ggplot() +
+  geom_line(mapping = aes(x = Date, y = Open), color = "blue")+
+  transition_reveal(Date)
+anim
+month_btc %>%
+  ggplot(mapping = aes(x = month, y = monthly.price, fill = month)) +
+  geom_col(position = "dodge") +
+  transition_reveal(as.integer(year))
+
+```
+
+from these visualisation we see the growth of bitcoin and spikes throught the years like November 6th 2010, Bitcoin share capital reaches 1 million USD. Its exchange rate on MtGox reaches USD 0.50 per BTC. June 2nd 2011, USD to BTC rate is 10 USD to the coin. For 6 days, the Bitcoin value is fixed at 31.91 USD on MtGox. February 28th 2013, Bitcoin exchange rate surpasses 31.91 USD for the first time for the last 601 days. April 1st,2013 Exchange rate of Bitcoin reaches 100 USD to 1 BTC. January,2015 Coinbase raised 75 million USD as part of a Series C funding round, smashing the previous record for a bitcoin company. February ,2015 Bitcoin price reached USD 262. January 2017,After the rally for most of the second half of 2016, bitcoin broke the USD 1,000 mark for the first time in 3 years. June 12th 2017, Bitcoin exchange rate exceeds USD 3000 to the BTC. November 29th 2017, Bitcoin price exceeds USD 10,000. December 18th 2017, Bitcoin reaches a record high, but does not reach USD 20,000. December 28th 2017, The price of bitcoins fell after South Korea announced additional measures to regulate bitcoin trading, including the potential closure of exchanges, among the volatile movements in the world's third largest cryptocurrency market. October 31st 2018, USD 6,300, on the 10 year anniversary of Bitcoin, price holds steady above USD 6,000 during a period of historically low volatility.
